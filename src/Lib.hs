@@ -32,8 +32,8 @@ parseInstruction instruction cnt = let (cmd, args) = break (==' ') instruction i
         "not" -> stackTop ++ ["M=!M"]
         "neg" -> stackTop ++ ["M=-M"]
         -- more than one args, pop one and modify one
-        "add" -> takePopD ++ ["M=D+M"]
-        "sub" -> takePopD ++ ["M=D-M"]
+        "add" -> takePopD ++ ["M=M+D"]
+        "sub" -> takePopD ++ ["M=M-D"]
         "and" -> takePopD ++ ["M=D&M"]
         "or" -> takePopD ++ ["M=D|M"]
         -- jump
@@ -53,7 +53,7 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
 stackTop = ["@SP", "A=M-1"]
 saveD = ["D=M"]
 stackPop = ["@SP", "M=M-1"]
-stackTopPop = ["@SP", "M=M-1", "A=M"]
+stackTopPop = ["@SP", "AM=M-1"]
 stackPush = ["@SP", "M=M+1", "A=M-1"]
 takePopD = stackTop ++ saveD ++ stackPop ++ stackTop
-doCmp cnt cmd = ["D=M-D"] ++ ["M=1", "@cmp" ++ show cnt, "D; " ++ cmd] ++ stackTop ++ ["M=0", "(cmp" ++ show cnt ++ ")"]
+doCmp cnt cmd = ["D=M-D"] ++ ["M=-1", "@cmp" ++ show cnt, "D; " ++ cmd] ++ stackTop ++ ["M=0", "(cmp" ++ show cnt ++ ")"]
