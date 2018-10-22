@@ -1,0 +1,6 @@
+.stack-work/
+hackvm.cabal
+*~
+data/
+dist/
+
