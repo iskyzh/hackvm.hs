@@ -23,7 +23,6 @@ dependencies:
 - base >= 4.7 && < 5
 - text
 - containers
-- HUnit >= 1.6
 
 library:
   source-dirs: src
@@ -49,3 +48,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - hackvm
+    - process
+    - hspec

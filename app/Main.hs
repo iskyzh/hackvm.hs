@@ -16,3 +16,4 @@ main = mainWith translate
             case args of
                 [input, output] -> interactWith function input output
                 _ -> putStrLn "err: exactly two arguments needed"
+                
