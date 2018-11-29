@@ -14,9 +14,9 @@ getTestDir path = do
     canonicalizePath (dir ++ "/data/" ++ path ++ "/")
 
 testAndCompare testDir testTraget = do
-    home_dir <- getCurrentDirectory
-    toolPath <- canonicalizePath (home_dir ++ "/data/tools/CPUEmulator.sh")
-    (exitCode, stdout, stderr) <- readProcessWithExitCode toolPath [testDir ++ "/" ++ testTraget] []
+    homeDir <- getCurrentDirectory
+    toolPath <- canonicalizePath (homeDir ++ "/data/tools/CPUEmulator.sh")
+    (exitCode, stdout, stderr) <- readCreateProcessWithExitCode (shell $ toolPath ++ " " ++ testDir ++ "/" ++ testTraget) []
     stderr `shouldBe` ""
     exitCode `shouldBe` ExitSuccess
 
