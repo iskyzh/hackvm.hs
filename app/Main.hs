@@ -9,7 +9,7 @@ interactWith function inputFile outputFile = do
     writeFile outputFile (function input)
 
 main :: IO ()
-main = mainWith translate
+main = mainWith translateMain
     where 
         mainWith function = do
             args <- getArgs

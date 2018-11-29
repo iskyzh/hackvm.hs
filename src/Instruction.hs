@@ -4,13 +4,13 @@ import Template
 import Memory
 import CompiledCode
 
-parseInstruction :: String -> String -> [CompiledCode]
-parseInstruction instruction symbol = let (cmd, args) = break (==' ') instruction in
+parseInstruction :: String -> String -> String -> [CompiledCode]
+parseInstruction instruction className symbol = let (cmd, args) = break (==' ') instruction in
         (Instruction $ "//" ++ instruction) -- add comments for current processing statement
             : parseInstruction' (trim cmd) (trim args) where
     parseInstruction' :: String -> String -> [CompiledCode]
     parseInstruction' cmd args = case cmd of
-        -- arithmetic operations
+        -- arithmetic / logical operations
         -- if only one arg is taken, just modify top
         "not" -> modifyStackTop [Instruction $ "M=!M"]
         "neg" -> modifyStackTop [Instruction $ "M=-M"]
@@ -23,8 +23,20 @@ parseInstruction instruction symbol = let (cmd, args) = break (==' ') instructio
         "eq" -> conditionModifyStackTop "JEQ" symbol
         "gt" -> conditionModifyStackTop "JGT" symbol
         "lt" -> conditionModifyStackTop "JLT" symbol
-        -- access operations
+        -- memory access operations
         "push" -> parseMemory "push" args
         "pop" -> parseMemory "pop" args
+        -- branching commands
+        "goto" -> [
+                Instruction $ "@" ++ className ++ "." ++ args,
+                Instruction $ "0; JMP"
+            ]
+        "label" -> [
+                Instruction $ "(" ++ className ++ "." ++ args ++ ")"
+            ]
+        "if-goto" -> popFromTop [] [
+                Instruction $ "@" ++ className ++ "." ++ args,
+                Instruction $ "D; JNE"
+            ]
         -- otherwise, throw error
         _ -> [CompileError $ "unsupported operation"]

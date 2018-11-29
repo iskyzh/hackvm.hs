@@ -31,7 +31,7 @@ operatorModifyStackTop cmd = [
         Instruction $ "A=A-1"   -- move to the second element
     ] ++ cmd
 
-conditionModifyStackTop jmp symbol = let cmp = "cmp." ++ symbol in
+conditionModifyStackTop jmp symbol = let cmp = symbol ++ "$cmp" in
     operatorModifyStackTop [
         -- save first element to D and access the second
         Instruction $ "D=M-D",     -- compare 2-1
