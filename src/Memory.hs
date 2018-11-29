@@ -47,11 +47,11 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
         ]
     -- static
     parseMemory' "push" "static" idx = pushToTop [
-            Instruction $ "@HACKVM." ++ show idx,
+            Instruction $ "@VM.STATIC." ++ show idx,
             Instruction $ "D=M"
         ]
     parseMemory' "pop" "static" idx = popFromTop [] [
-            Instruction $ "@HACKVM." ++ show idx,
+            Instruction $ "@VM.STATIC." ++ show idx,
             Instruction $ "M=D"
         ]
     -- pointer

@@ -3,7 +3,8 @@ module Lib
         translate,
         translateMain,
         parse,
-        parseInstruction
+        parseInstruction,
+        splitClass
     ) where
 
 import Data.Char (isSpace)
@@ -13,6 +14,9 @@ import Template
 import Memory
 import Instruction
 import CompiledCode
+
+splitClass :: String -> String
+splitClass fileName = let (className, _) = break (== '.') fileName in className
 
 translateMain :: String -> String
 translateMain code = translate code "Main"
@@ -32,5 +36,5 @@ parse instructions className = parse' instructions (symbols className) where
         | "//" `isPrefixOf` (trim instruction) = parse' xs symbols       -- ignore comments
         | all isSpace instruction = parse' xs symbols                    -- ignore empty line
         | otherwise = let (ins, comment) = break (== '/') instruction in
-            parseInstruction ins className (head symbols) ++ parse' xs (tail symbols)
+            parseInstruction (trim ins) className (head symbols) ++ parse' xs (tail symbols)
     parse' _ _ = []

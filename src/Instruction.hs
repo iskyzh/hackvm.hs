@@ -2,6 +2,7 @@ module Instruction where
 
 import Template
 import Memory
+import Function
 import CompiledCode
 
 parseInstruction :: String -> String -> String -> [CompiledCode]
@@ -38,5 +39,9 @@ parseInstruction instruction className symbol = let (cmd, args) = break (==' ') 
                 Instruction $ "@" ++ className ++ "." ++ args,
                 Instruction $ "D; JNE"
             ]
+        -- function commands
+        "function" -> parseFunction args symbol
+        "call" -> parseCall args symbol
+        "return" -> parseReturn symbol
         -- otherwise, throw error
         _ -> [CompileError $ "unsupported operation"]

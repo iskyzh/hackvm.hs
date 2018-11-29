@@ -3,13 +3,31 @@ import Control.Exception (evaluate)
 import System.Directory (getCurrentDirectory, withCurrentDirectory, canonicalizePath)
 import System.Process
 import System.Exit
-import Lib (parse, translate, translateMain)
+import Lib (parse, translate, translateMain, splitClass)
 import CompiledCode
+
+compileFile fileName className = do
+    vm <- readFile fileName
+    return $ translate vm className
 
 compile input output = do 
     vm <- readFile input
-    writeFile output $ translateMain vm
+    writeFile output $ translate vm (splitClass input)
 
+bootstrap = [
+        "@256",
+        "D=A",
+        "@SP",
+        "M=D",
+        "@Sys.init",
+        "0; JMP"
+    ]
+
+pack package classes output = do 
+    code <- mapM (\className -> compileFile (className ++ ".vm") className) classes
+    writeFile output $ unlines $ bootstrap ++ code
+
+        
 getTestDir path = do
     dir <- getCurrentDirectory
     canonicalizePath (dir ++ "/data/" ++ path ++ "/")
@@ -26,6 +44,11 @@ testSuite testSuite testCase = do
     withCurrentDirectory dir $ compile (testCase ++ ".vm") (testCase ++ ".asm")
     testAndCompare dir (testCase ++ ".tst")
 
+testPackage testSuite testPackage testClasses = do
+    dir <- getTestDir $ testSuite ++ "/" ++ testPackage
+    withCurrentDirectory dir $ pack testPackage testClasses (testPackage ++ ".asm")
+    testAndCompare dir (testPackage ++ ".tst")
+    
 main :: IO ()
 main = hspec $ do
     describe "parse" $ do
@@ -64,23 +87,24 @@ main = hspec $ do
 
             it "should translate StaticTest" $  do
                 testSuite "MemoryAccess" "StaticTest"
-        {-
-        describe "FunctionCalls" $ do
-            it "should translate FibonacciElement" $ do
-                testSuite "FunctionCalls" "FibonacciElement"
 
-            it "should translate NestedCall" $ do
-                testSuite "FunctionCalls" "NestedCall"
-
-            it "should translate SimpleFunction" $ do
-                testSuite "FunctionCalls" "SimpleFunction"
-
-            it "should translate StaticsTest" $ do
-                testSuite "FunctionCalls" "StaticsTest"
-        -}
         describe "ProgramFlow" $ do
             it "should translate BasicLoop" $ do
                 testSuite "ProgramFlow" "BasicLoop"
 
             it "should translate FibonacciSeries" $ do
                 testSuite "ProgramFlow" "FibonacciSeries"
+
+        describe "FunctionCalls" $ do
+            it "should translate SimpleFunction" $ do
+                testSuite "FunctionCalls" "SimpleFunction"
+
+            it "should translate NestedCall" $ do
+                testPackage "FunctionCalls" "NestedCall" ["Sys"]
+
+            it "should translate FibonacciElement" $ do
+                testPackage "FunctionCalls" "FibonacciElement" ["Sys", "Main"]
+
+            it "should translate StaticsTest" $ do
+                testPackage "FunctionCalls" "StaticsTest" ["Sys", "Class1", "Class2"]
+        

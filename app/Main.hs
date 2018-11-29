@@ -6,10 +6,10 @@ import System.Environment (getArgs)
 
 interactWith function inputFile outputFile = do
     input <- readFile inputFile
-    writeFile outputFile (function input)
+    writeFile outputFile (function input (splitClass inputFile))
 
 main :: IO ()
-main = mainWith translateMain
+main = mainWith translate
     where 
         mainWith function = do
             args <- getArgs
