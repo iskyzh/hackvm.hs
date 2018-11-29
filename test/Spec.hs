@@ -18,10 +18,8 @@ bootstrap = [
         "@256",
         "D=A",
         "@SP",
-        "M=D",
-        "@Sys.init",
-        "0; JMP"
-    ]
+        "M=D"
+    ] ++ [translate "call Sys.init 0" ""]
 
 pack package classes output = do 
     code <- mapM (\className -> compileFile (className ++ ".vm") className) classes

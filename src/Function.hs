@@ -102,5 +102,6 @@ parseReturn symbol = [
         Instruction $ "M=D"     -- save endframe - 4 to LCL
     ] ++ [
         Instruction $ "@R13",
-        Instruction $ "A=M"
+        Instruction $ "A=M",
+        Instruction $ "0; JMP"
     ]
