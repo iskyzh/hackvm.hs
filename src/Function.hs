@@ -2,7 +2,15 @@ module Function where
 
 import Template
 import CompiledCode
-    
+
+moveForwardSP 0 = []
+moveForwardSP n = [
+        Instruction $ "A=M",
+        Instruction $ "M=0",
+        Instruction $ "@SP",
+        Instruction $ "M=M+1"
+    ] ++ moveForwardSP (n - 1)
+
 parseFunction :: String -> String -> [CompiledCode]
 parseFunction args symbol = let 
     (functionName, _args) = break (== ' ') args
@@ -10,10 +18,8 @@ parseFunction args symbol = let
     in [
         Instruction $ "(" ++ functionName ++ ")",
         Instruction $ "@" ++ show nVars,
-        Instruction $ "D=A",     -- save nVars to D
-        Instruction $ "@SP",
-        Instruction $ "M=M+D"    -- move SP forward nVars
-    ]
+        Instruction $ "@SP"
+    ] ++ moveForwardSP nVars
 
 parseCall :: String -> String -> [CompiledCode]
 parseCall args symbol = let 
