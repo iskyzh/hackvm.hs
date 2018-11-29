@@ -25,8 +25,8 @@ parseInstruction instruction className symbol = let (cmd, args) = break (==' ') 
         "gt" -> conditionModifyStackTop "JGT" symbol
         "lt" -> conditionModifyStackTop "JLT" symbol
         -- memory access operations
-        "push" -> parseMemory "push" args
-        "pop" -> parseMemory "pop" args
+        "push" -> parseMemory "push" args className
+        "pop" -> parseMemory "pop" args className
         -- branching commands
         "goto" -> [
                 Instruction $ "@" ++ className ++ "." ++ args,

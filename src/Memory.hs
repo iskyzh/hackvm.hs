@@ -3,9 +3,9 @@ module Memory where
 import Template
 import CompiledCode
 
-parseMemory :: String -> String -> [CompiledCode]
+parseMemory :: String -> String -> String -> [CompiledCode]
 
-parseMemory cmd args = let (src, idx) = break (==' ') args in
+parseMemory cmd args className = let (src, idx) = break (==' ') args in
     parseMemory' cmd src (read (trim idx)::Int) where
     parseMemory' :: String -> String -> Int -> [CompiledCode]
     -- constant
@@ -47,11 +47,11 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
         ]
     -- static
     parseMemory' "push" "static" idx = pushToTop [
-            Instruction $ "@VM.STATIC." ++ show idx,
+            Instruction $ staticAddr idx,
             Instruction $ "D=M"
         ]
     parseMemory' "pop" "static" idx = popFromTop [] [
-            Instruction $ "@VM.STATIC." ++ show idx,
+            Instruction $ staticAddr idx,
             Instruction $ "M=D"
         ]
     -- pointer
@@ -96,3 +96,5 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
             Instruction $ "A=D+A",             -- access LCL + i
             Instruction $ "D=M"                -- save to D
         ]
+    staticAddr idx = "@" ++ className ++ ".STATIC." ++ show idx
+    
