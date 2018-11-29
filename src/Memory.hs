@@ -1,16 +1,17 @@
 module Memory where
 
 import Template
+import CompiledCode
 
-parseMemory :: String -> String -> [String]
+parseMemory :: String -> String -> [CompiledCode]
 
 parseMemory cmd args = let (src, idx) = break (==' ') args in
     parseMemory' cmd src (read (trim idx)::Int) where
-    parseMemory' :: String -> String -> Int -> [String]
+    parseMemory' :: String -> String -> Int -> [CompiledCode]
     -- constant
     parseMemory' "push" "constant" idx = pushAndModifyStackTop [
-            "@" ++ show idx,
-            "D=A"            -- save constant to D
+            Instruction $ "@" ++ show idx,
+            Instruction $ "D=A"            -- save constant to D
         ]
     -- local
     parseMemory' "push" "local" idx = pushMemoryOffset "LCL" idx
@@ -26,32 +27,32 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
     parseMemory' "pop" "that" idx = popMemoryOffset "THAT" idx
     -- temp
     parseMemory' "push" "temp" idx = pushToTop [
-            "@5",
-            "D=A",
-            "@" ++ show idx,
-            "A=D+A",             -- access LCL + i
-            "D=M"                -- save to D
+            Instruction $ "@5",
+            Instruction $ "D=A",
+            Instruction $ "@" ++ show idx,
+            Instruction $ "A=D+A",             -- access LCL + i
+            Instruction $ "D=M"                -- save to D
         ]
     parseMemory' "pop" "temp" idx = popFromTop [
-            "@5",
-            "D=A",
-            "@" ++ show idx,
-            "D=D+A",             -- save LCL + i
-            "@R13",
-            "M=D"                -- to R13
+            Instruction $ "@5",
+            Instruction $ "D=A",
+            Instruction $ "@" ++ show idx,
+            Instruction $ "D=D+A",             -- save LCL + i
+            Instruction $ "@R13",
+            Instruction $ "M=D"                -- to R13
         ] [
-            "@R13",
-            "A=M",               -- move to LCL + i
-            "M=D"                -- save D to LCL + i
+            Instruction $ "@R13",
+            Instruction $ "A=M",               -- move to LCL + i
+            Instruction $ "M=D"                -- save D to LCL + i
         ]
     -- static
     parseMemory' "push" "static" idx = pushToTop [
-            "@HACKVM." ++ show idx,
-            "D=M"
+            Instruction $ "@HACKVM." ++ show idx,
+            Instruction $ "D=M"
         ]
     parseMemory' "pop" "static" idx = popFromTop [] [
-        "@HACKVM." ++ show idx,
-        "M=D"
+            Instruction $ "@HACKVM." ++ show idx,
+            Instruction $ "M=D"
         ]
     -- pointer
     parseMemory' "push" "pointer" 0 = pushMemoryPointer "THIS"
@@ -59,39 +60,39 @@ parseMemory cmd args = let (src, idx) = break (==' ') args in
     parseMemory' "pop" "pointer" 0 = popMemoryPointer "THIS"
     parseMemory' "pop" "pointer" 1 = popMemoryPointer "THAT"
     -- otherwise
-    parseMemory' _ _ _ = error ("compile error")
+    parseMemory' _ _ _ = [CompileError "invaild memory segment"]
 
-    pushMemoryPointer :: String -> [String]
+    pushMemoryPointer :: String -> [CompiledCode]
     pushMemoryPointer target = pushToTop [
-            "@" ++ target,
-            "D=M"
+            Instruction $ "@" ++ target,
+            Instruction $ "D=M"
         ]
 
-    popMemoryPointer :: String -> [String]
+    popMemoryPointer :: String -> [CompiledCode]
     popMemoryPointer target = popFromTop [] [
-            "@" ++ target,
-            "M=D"
+            Instruction $ "@" ++ target,
+            Instruction $ "M=D"
         ]
 
-    popMemoryOffset :: String -> Int -> [String]
+    popMemoryOffset :: String -> Int -> [CompiledCode]
     popMemoryOffset label idx = popFromTop [
-            "@" ++ label,
-            "D=M",
-            "@" ++ show idx,
-            "D=D+A",             -- save LCL + i
-            "@R13",
-            "M=D"                -- to R13
+            Instruction $ "@" ++ label,
+            Instruction $ "D=M",
+            Instruction $ "@" ++ show idx,
+            Instruction $ "D=D+A",             -- save LCL + i
+            Instruction $ "@R13",
+            Instruction $ "M=D"                -- to R13
         ] [
-            "@R13",
-            "A=M",               -- move to LCL + i
-            "M=D"                -- save D to LCL + i
+            Instruction $ "@R13",
+            Instruction $ "A=M",               -- move to LCL + i
+            Instruction $ "M=D"                -- save D to LCL + i
         ]
 
-    pushMemoryOffset :: String -> Int -> [String]
+    pushMemoryOffset :: String -> Int -> [CompiledCode]
     pushMemoryOffset label idx = pushToTop [
-            "@" ++ label,
-            "D=M",
-            "@" ++ show idx,
-            "A=D+A",             -- access LCL + i
-            "D=M"                -- save to D
+            Instruction $ "@" ++ label,
+            Instruction $ "D=M",
+            Instruction $ "@" ++ show idx,
+            Instruction $ "A=D+A",             -- access LCL + i
+            Instruction $ "D=M"                -- save to D
         ]

@@ -1,52 +1,54 @@
 module Template where
-    
+
 import Data.Char (isSpace)
 import Data.List (isPrefixOf, dropWhileEnd)
 
+import CompiledCode
+
 pushToTop cmd = cmd ++ [
-        "@SP",
-        "A=M",      -- move to stack top
-        "M=D",      -- save D
-        "@SP",
-        "M=M+1"     -- push stack top
+        Instruction $ "@SP",
+        Instruction $ "A=M",      -- move to stack top
+        Instruction $ "M=D",      -- save D
+        Instruction $ "@SP",
+        Instruction $ "M=M+1"     -- push stack top
     ]
 
 popFromTop before after = before ++ [
-        "@SP",
-        "AM=M-1",     -- pop and move to previous stack top
-        "D=M"         -- save stack top to D
+        Instruction $ "@SP",
+        Instruction $ "AM=M-1",     -- pop and move to previous stack top
+        Instruction $ "D=M"         -- save stack top to D
     ] ++ after
 
 modifyStackTop cmd = [
-        "@SP", 
-        "A=M-1" -- access stack top
+        Instruction $ "@SP", 
+        Instruction $ "A=M-1" -- access stack top
     ] ++ cmd
 
 operatorModifyStackTop cmd = [
-        "@SP",
-        "AM=M-1", -- pop one from stack top and access last top
-        "D=M",    -- save first operate element to D
-        "A=A-1"   -- move to the second element
+        Instruction $ "@SP",
+        Instruction $ "AM=M-1", -- pop one from stack top and access last top
+        Instruction $ "D=M",    -- save first operate element to D
+        Instruction $ "A=A-1"   -- move to the second element
     ] ++ cmd
 
 conditionModifyStackTop jmp symbol = let cmp = "cmp." ++ symbol in
     operatorModifyStackTop [
-                     -- save first element to D and access the second
-        "D=M-D",     -- compare 2-1
-        "M=-1",      -- top element is true at first
-        '@':cmp,     -- specify jump point
-        "D; " ++ jmp -- jump
+        -- save first element to D and access the second
+        Instruction $ "D=M-D",     -- compare 2-1
+        Instruction $ "M=-1",      -- top element is true at first
+        Instruction $ '@':cmp,     -- specify jump point
+        Instruction $ "D; " ++ jmp -- jump
     ] ++ modifyStackTop [
                      -- go to stack top again
-        "M=0",       -- set stack top to false is condition is not satisfied
-        "(" ++ cmp ++ ")"
+        Instruction $ "M=0",       -- set stack top to false is condition is not satisfied
+        Instruction $ "(" ++ cmp ++ ")"
     ]
 
 pushAndModifyStackTop cmd = cmd ++ [
-        "@SP",
-        "M=M+1",    -- push
-        "A=M-1",    -- move to stack top
-        "M=D"       -- save data
+        Instruction $ "@SP",
+        Instruction $ "M=M+1",    -- push
+        Instruction $ "A=M-1",    -- move to stack top
+        Instruction $ "M=D"       -- save data
     ]
 
 trim = dropWhileEnd isSpace . dropWhile isSpace

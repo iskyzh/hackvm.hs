@@ -2,21 +2,23 @@ module Instruction where
 
 import Template
 import Memory
-parseInstruction :: String -> String -> [String]
+import CompiledCode
+
+parseInstruction :: String -> String -> [CompiledCode]
 parseInstruction instruction symbol = let (cmd, args) = break (==' ') instruction in
-    ("//" ++ instruction) -- add comments for current processing statement
-        : parseInstruction' (trim cmd) (trim args) where
-    parseInstruction' :: String -> String -> [String]
+        (Instruction $ "//" ++ instruction) -- add comments for current processing statement
+            : parseInstruction' (trim cmd) (trim args) where
+    parseInstruction' :: String -> String -> [CompiledCode]
     parseInstruction' cmd args = case cmd of
         -- arithmetic operations
         -- if only one arg is taken, just modify top
-        "not" -> modifyStackTop ["M=!M"]
-        "neg" -> modifyStackTop ["M=-M"]
+        "not" -> modifyStackTop [Instruction $ "M=!M"]
+        "neg" -> modifyStackTop [Instruction $ "M=-M"]
         -- more than one args, pop one and modify one
-        "add" -> operatorModifyStackTop ["M=M+D"]
-        "sub" -> operatorModifyStackTop ["M=M-D"]
-        "and" -> operatorModifyStackTop ["M=D&M"]
-        "or" -> operatorModifyStackTop ["M=D|M"]
+        "add" -> operatorModifyStackTop [Instruction $ "M=M+D"]
+        "sub" -> operatorModifyStackTop [Instruction $ "M=M-D"]
+        "and" -> operatorModifyStackTop [Instruction $ "M=D&M"]
+        "or" -> operatorModifyStackTop [Instruction $ "M=D|M"]
         -- jump
         "eq" -> conditionModifyStackTop "JEQ" symbol
         "gt" -> conditionModifyStackTop "JGT" symbol
@@ -25,4 +27,4 @@ parseInstruction instruction symbol = let (cmd, args) = break (==' ') instructio
         "push" -> parseMemory "push" args
         "pop" -> parseMemory "pop" args
         -- otherwise, throw error
-        _ -> error ("compile error: " ++ instruction)
+        _ -> [CompileError $ "unsupported operation"]

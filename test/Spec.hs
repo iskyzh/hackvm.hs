@@ -4,6 +4,7 @@ import System.Directory (getCurrentDirectory, withCurrentDirectory, canonicalize
 import System.Process
 import System.Exit
 import Lib (parse, translate)
+import CompiledCode
 
 compile input output = do 
     vm <- readFile input
@@ -36,7 +37,16 @@ main = hspec $ do
   
         it "should ignore empty line" $ do
             parse ["    "] `shouldBe` []
-            
+
+        it "should error unsupported operation" $ do
+            parse ["ed"] `shouldContain` [CompileError "unsupported operation"]
+        
+        it "should error incomplete instruction" $ do
+            parse ["ed eq"] `shouldContain` [CompileError "unsupported operation"]
+                
+        it "should error invaild memory segment" $ do
+            parse ["push 233"] `shouldContain` [CompileError "invaild memory segment"]
+                   
     describe "translate" $ do
         describe "StackArithmetic" $ do
             it "should translate SimpleAdd" $  do
