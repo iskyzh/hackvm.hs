@@ -43,17 +43,18 @@ parseInstruction instruction symbol = let (cmd, args) = break (==' ') instructio
         "gt" -> conditionModifyStackTop "JGT" symbol
         "lt" -> conditionModifyStackTop "JLT" symbol
         -- access operations
-        -- TODO: complete access operations
-        -- "push" -> parseMemory "push" args
-        -- "pop" -> parseMemory "pop" args
+        "push" -> parseMemory "push" args
+        "pop" -> parseMemory "pop" args
+        -- otherwise, throw error
+        _ -> error ("compile error: " ++ instruction)
 
-{-
+
 parseMemory :: String -> String -> [String]
 parseMemory cmd args = let (src, idx) = break (==' ') args in
     parseMemory' cmd src (read (trim idx)::Int) where
     parseMemory' :: String -> String -> Int -> [String]
-    parseMemory' "push" "constant" idx = ["@" ++ show idx, "D=A"] ++ stackPush ++ ["M=D"]
--}
+    parseMemory' "push" "constant" idx = ["@" ++ show idx, "D=A", "@SP", "M=M+1", "A=M-1", "M=D"]
+
 
 modifyStackTop cmd = [
     "@SP", 

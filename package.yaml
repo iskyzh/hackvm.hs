@@ -50,3 +50,4 @@ tests:
     - hackvm
     - process
     - hspec
+    - directory
