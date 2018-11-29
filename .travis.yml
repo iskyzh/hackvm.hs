@@ -1,6 +1,4 @@
 language: java
-ghc:
-  - "8.4.3"
 cache:
   directories:
   - $HOME/.stack
@@ -10,8 +8,8 @@ before_install:
   - export PATH=$HOME/.local/bin:$PATH
   - travis_retry curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 install:
-  - travis_wait stack --no-terminal --skip-ghc-check setup
-  - travis_wait stack --no-terminal --skip-ghc-check test --only-snapshot
+  - stack --no-terminal --skip-ghc-check setup
+  - stack --no-terminal --skip-ghc-check test --only-snapshot
 before_script:
   - git clone https://github.com/SkyZH/Nand2TetrisHackDependency.git data --branch=hack-vm
 script:
