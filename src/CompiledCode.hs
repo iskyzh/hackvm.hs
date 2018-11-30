@@ -1,4 +1,4 @@
 module CompiledCode where
 
-data CompiledCode = Instruction String | CompileError String 
+data CompiledCode = Instruction String | CompileError String
     deriving(Show, Eq)
