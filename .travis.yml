@@ -13,4 +13,4 @@ install:
 before_script:
   - git clone https://github.com/SkyZH/Nand2TetrisHackDependency.git data --branch=hack-vm
 script:
-  - stack --no-terminal --skip-ghc-check test
+  - stack --no-terminal --skip-ghc-check test --color
